@@ -64,7 +64,7 @@ test_expect_success '1a-setup: Modify(A)/Modify(B), change on B subset of A' '
 	)
 '
 
-test_expect_failure '1a-check-L: Modify(A)/Modify(B), change on B subset of A' '
+test_expect_success '1a-check-L: Modify(A)/Modify(B), change on B subset of A' '
 	test_when_finished "git -C 1a reset --hard" &&
 	(
 		cd 1a &&
@@ -346,7 +346,7 @@ test_expect_success '3a-setup: bq_1->foo/bq_2 on A, foo/->bar/ on B' '
 	)
 '
 
-test_expect_failure '3a-check-L: bq_1->foo/bq_2 on A, foo/->bar/ on B' '
+test_expect_success '3a-check-L: bq_1->foo/bq_2 on A, foo/->bar/ on B' '
 	test_when_finished "git -C 3a reset --hard" &&
 	(
 		cd 3a &&

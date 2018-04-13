@@ -2796,16 +2796,22 @@ static int merge_content(struct merge_options *o,
 				       o->branch2, path2, &mfi))
 		return -1;
 
+	/*
+	 * We can skip updating the working tree file iff:
+	 *   a) The merged contents match what was in HEAD
+	 *   b) The merged mode matches what was in HEAD
+	 *   c) The target path is usable and matches what was in HEAD
+	 * We test (a) & (b) here.
+	 */
 	if (mfi.clean && oid_eq(&mfi.oid, a_oid) && mfi.mode == a_mode) {
-		int path_renamed_outside_HEAD;
 		/*
-		 * The content merge resulted in the same file contents we
-		 * already had.  We can return early if those file contents
-		 * are recorded at the correct path (which may not be true
-		 * if the merge involves a rename or there's a D/F conflict).
+		 * Case c has two pieces:
+		 *   c1) Nothing else is in the way of writing the merged
+		 *       results to path (i.e. it isn't involved in any
+		 *       D/F conflict)
+		 *   c2) path was tracked in the index before the merge
 		 */
-		path_renamed_outside_HEAD = !path2 || !strcmp(path, path2);
-		if (!df_conflict_remains && !path_renamed_outside_HEAD) {
+		if (!df_conflict_remains && was_tracked(o, path)) {
 			output(o, 3, _("Skipped %s (merged same as existing)"), path);
 			add_cacheinfo(o, mfi.mode, &mfi.oid, path,
 				      0, (!o->call_depth), 0);
