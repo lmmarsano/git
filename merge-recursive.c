@@ -2159,9 +2159,9 @@ static void apply_directory_rename_modifications(struct merge_options *o,
 	 * the various conflict_rename_*() functions update the index
 	 * explicitly rather than relying on unpack_trees() to have done it.
 	 */
-	get_tree_entry(tree->object.oid.hash,
+	get_tree_entry(&tree->object.oid,
 		       pair->two->path,
-		       re->dst_entry->stages[stage].oid.hash,
+		       &re->dst_entry->stages[stage].oid,
 		       &re->dst_entry->stages[stage].mode);
 
 	/* Update pair status */
@@ -2771,21 +2771,22 @@ static int merge_content(struct merge_options *o,
 				       o->branch2, path2, &mfi))
 		return -1;
 
-	if (mfi.clean && !df_conflict_remains &&
-	    oid_eq(&mfi.oid, a_oid) && mfi.mode == a_mode) {
+	if (mfi.clean && oid_eq(&mfi.oid, a_oid) && mfi.mode == a_mode) {
 		int path_renamed_outside_HEAD;
-		output(o, 3, _("Skipped %s (merged same as existing)"), path);
 		/*
 		 * The content merge resulted in the same file contents we
 		 * already had.  We can return early if those file contents
 		 * are recorded at the correct path (which may not be true
-		 * if the merge involves a rename).
+		 * if the merge involves a rename or there's a D/F conflict).
 		 */
 		path_renamed_outside_HEAD = !path2 || !strcmp(path, path2);
-		if (!path_renamed_outside_HEAD) {
+		if (!df_conflict_remains && !path_renamed_outside_HEAD) {
+			output(o, 3, _("Skipped %s (merged same as existing)"), path);
 			add_cacheinfo(o, mfi.mode, &mfi.oid, path,
 				      0, (!o->call_depth), 0);
 			return mfi.clean;
+		} else {
+			output(o, 3, _("Had correct contents for %s, but not at right path"), path);
 		}
 	} else
 		output(o, 2, _("Auto-merging %s"), path);
