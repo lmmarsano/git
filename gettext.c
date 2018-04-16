@@ -3,7 +3,7 @@
  */
 
 #include "cache.h"
-#include "exec_cmd.h"
+#include "exec-cmd.h"
 #include "gettext.h"
 #include "strbuf.h"
 #include "utf8.h"
